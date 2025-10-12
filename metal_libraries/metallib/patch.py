@@ -53,7 +53,11 @@ class MetallibPatch:
                     "particle_quad_frag",
                 ],
             },
-            "air": {},
+            "air": {
+                "CUIInnerGlowKernel.air": [
+                    "/System/Library/PrivateFrameworks/CoreUI.framework/Versions/A/Resources/default.metallib"
+                ],
+            },
             "ll": {},
         }
 
@@ -83,6 +87,30 @@ class MetallibPatch:
         - Path to the decompiled .ll
         """
         output = Path(input).with_suffix(".ll")
+
+        # Check if the file is in the broken file list
+        input_path = Path(input)
+        is_broken = False
+        if len(self._broken_file_map["air"]) > 0:
+            for key, value in self._broken_file_map["air"].items():
+                if input_path.name != key:
+                    continue
+                # If we have specific metallib paths to check against
+                if value and str(input_path).endswith(tuple(value)):
+                    print(f"  - Skipping {input_path.name} as it is known to be broken")
+                    is_broken = True
+                    # Create an empty file as placeholder
+                    with open(output, "w") as f:
+                        f.write("; Decompile skipped - known broken file\n")
+                    return output
+                # If it's in the broken list but no specific paths specified
+                elif not value:
+                    print(f"  - Skipping {input_path.name} as it is known to be broken")
+                    is_broken = True
+                    # Create an empty file as placeholder
+                    with open(output, "w") as f:
+                        f.write("; Decompile skipped - known broken file\n")
+                    return output
 
         result = subprocess.run(["/usr/bin/xcrun", "metal-objdump", "--disassemble", input], capture_output=True, text=True)
         if result.returncode != 0:
@@ -334,11 +362,19 @@ class MetallibPatch:
 
             print("- Patching .ll files")
             for ll_file in ll_files:
+                # Skip patching for empty/degenerate files
+                if Path(ll_file).stat().st_size == 0 or open(ll_file).readline().startswith("; Decompile skipped"):
+                    print(f"  - Skipping patch for {ll_file.name} as it was not decompiled")
+                    continue
                 self._patch_ll(ll_file)
 
             print("- Recompiling .ll files to .air")
             air_files = []
             for ll_file in ll_files:
+                # Skip recompiling for empty/degenerate files
+                if Path(ll_file).stat().st_size == 0 or open(ll_file).readline().startswith("; Decompile skipped"):
+                    print(f"  - Skipping recompile for {ll_file.name} as it was not decompiled")
+                    continue
                 air_file = self._recompile_ll_to_air(ll_file)
                 air_files.append(air_file)
 
