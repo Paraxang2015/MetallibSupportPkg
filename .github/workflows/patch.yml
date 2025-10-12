@@ -40,7 +40,8 @@ jobs:
           rsync -a --delete empty_dir/ /Applications/Xcode_15.0.1.app/
           rsync -a --delete empty_dir/ /Applications/Xcode_14.3.1.app/
           rsync -a --delete empty_dir/ /Users/runner/Library/Android/sdk/
-
+      - name: Select Xcode 26.0
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
       - name: Install dependencies
         run: python3 -m pip install -r requirements.txt
 
