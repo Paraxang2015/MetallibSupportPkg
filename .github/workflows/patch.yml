@@ -15,6 +15,9 @@ jobs:
     name: CI - Patch latest Tahoe metallib's
     runs-on: macos-26
 
+    env:
+      # GitHub Releases API
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +27,7 @@ jobs:
         with:
           python-version: 3.11
 
+    
 
       - name: Free up space
         run: |
@@ -73,6 +77,20 @@ jobs:
         with:
           name: MetallibSupportPkg.pkg
           path: ./MetallibSupportPkg-*.pkg
+
+      - name: Upload sys_patch_dict.py to Artifacts
+        if: steps.fetch.outputs.BACKUP_FOLDER != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: sys_patch_dict.py
+          path: sys_patch_dict.py
+
+      - name: Upload manifest to Artifacts
+        if: steps.fetch.outputs.BACKUP_FOLDER != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest.json
+          path: deploy/manifest.json
 
       - name: Create GitHub release
         if: ${{ github.ref == 'refs/heads/main' && steps.fetch.outputs.BACKUP_FOLDER != '' }}
