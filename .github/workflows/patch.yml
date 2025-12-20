@@ -1,8 +1,7 @@
 name: CI - Patch latest Sequoia metallib's
 
 on:
-  schedule:
-  - cron: "0 */3 * * *"
+  
   push:
     branches:
       - main
@@ -13,8 +12,8 @@ concurrency:
 
 jobs:
   build:
-    name: CI - Patch latest Sequoia metallib's
-    runs-on: macos-latest
+    name: CI - Patch latest Tahoe metallib's
+    runs-on: macos-26
 
 
     steps:
@@ -37,7 +36,8 @@ jobs:
           rsync -a --delete empty_dir/ /Applications/Xcode_15.0.1.app/
           rsync -a --delete empty_dir/ /Applications/Xcode_14.3.1.app/
           rsync -a --delete empty_dir/ /Users/runner/Library/Android/sdk/
-
+      - name: Select Xcode 26.0
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
       - name: Install dependencies
         run: python3 -m pip install -r requirements.txt
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Build Package
         if: steps.fetch.outputs.BACKUP_FOLDER != ''
-        run: python3 metallib.py --build-pkg ${{ steps.fetch.outputs.BACKUP_FOLDER }} --pkg-signing-identity "${{env.ORG_MAC_DEVELOPER_ID_INSTALLER_IDENTITY}}" --notarization-team-id "${{env.ORG_MAC_NOTARIZATION_TEAM_ID}}" --notarization-apple-id "${{env.ORG_MAC_NOTARIZATION_APPLE_ID}}" --notarization-password "${{env.ORG_MAC_NOTARIZATION_PASSWORD}}"
+        run: python3 metallib.py --build-pkg ${{ steps.fetch.outputs.BACKUP_FOLDER }}"
 
       - name: Upload metal libraries to Artifacts
         if: steps.fetch.outputs.BACKUP_FOLDER != ''
