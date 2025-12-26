@@ -1,6 +1,6 @@
 # MetallibSupportPkg
 
-A collection of utilities related to patching Metal Libraries (`.metallib`) in macOS, specifically with the goal of restoring support for legacy hardware (namely Metal 3802-based GPUs on macOS Sequoia).
+A collection of utilities related to patching Metal Libraries (`.metallib`) in macOS, specifically with the goal of restoring support for legacy hardware (namely Metal 3802-based GPUs on macOS Sequoia And Tahoe).
 
 ## Logic
 
